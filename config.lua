@@ -23,7 +23,7 @@ Config.Permissions = {
     { label = "Player", roleid = 1125840816666071195, groupname = "group.member"}
 }
 
-Config.WhitelistRoleID = 1125840816666071195 -- Id of the Role you want to be able to connect
+Config.WhitelistRoleID = "1125840816666071195" -- Id of the Role you want to be able to connect
 
 Config.GuildID = 'YOURGUILDID' -- ID of your Discord Server
 
