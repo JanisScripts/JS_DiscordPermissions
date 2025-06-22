@@ -173,7 +173,7 @@ AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
             end
         else
             local userRoles = GetUserRoles(src)
-            if not userRoles or not userRoles[Config.WhitelistRole] then
+            if not userRoles or not userRoles[Config.WhitelistRoleID] then
                 if not cardShown then
                     cardShown = true
                     sendDebug("Spieler " .. GetPlayerName(src) .. " besitzt keine Whitelist-Rolle!", "warning")
