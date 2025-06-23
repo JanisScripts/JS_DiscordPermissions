@@ -9,7 +9,8 @@ A FiveM Permission System using Discord Roles including an integrated Whitelist
 1. Download the Resource
 2. Drag and Drop in your resource Folder
 3. put "start JS_DiscordPermissions" into your server.cfg
-4. Enjoy ;)
+4. Also put "add_ace resource.JS_DiscordPermissions command.add_principal allow" and "add_ace resource.JS_DiscordPermissions command.remove_principal allow" into your Server.cfg
+5. Enjoy ;)
 
 ## Usage
 ### Important 
