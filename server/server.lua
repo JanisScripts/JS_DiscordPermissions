@@ -1,3 +1,81 @@
+local buttonsJson = ''
+
+if Config.EnableWebsiteLink then
+    buttonsJson = [[
+    {
+      "type": "ColumnSet",
+      "spacing": "Medium",
+      "horizontalAlignment": "Center",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "auto",
+          "horizontalAlignment": "Center",
+          "items": [
+            {
+              "type": "ActionSet",
+              "actions": [
+                {
+                  "type": "Action.OpenUrl",
+                  "title": "💠 DISCORD 💠",
+                  "url": "]] .. Config.DiscordInvite .. [[",
+                  "style": "positive"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": "auto",
+          "horizontalAlignment": "Center",
+          "items": [
+            {
+              "type": "ActionSet",
+              "actions": [
+                {
+                  "type": "Action.OpenUrl",
+                  "title": "🌐 WEBSITE 🌐",
+                  "url": "]] .. Config.WebsiteLink .. [[",
+                  "style": "positive"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    ]]
+else
+    buttonsJson = [[
+    {
+      "type": "ColumnSet",
+      "spacing": "Medium",
+      "horizontalAlignment": "Center",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "auto",
+          "horizontalAlignment": "Center",
+          "items": [
+            {
+              "type": "ActionSet",
+              "actions": [
+                {
+                  "type": "Action.OpenUrl",
+                  "title": "💠 DISCORD 💠",
+                  "url": "]] .. Config.DiscordInvite .. [[",
+                  "style": "positive"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    ]]
+end
+
 local AdaptiveCard = [[
 {
   "type": "AdaptiveCard",
@@ -41,49 +119,7 @@ local AdaptiveCard = [[
           "horizontalAlignment": "Center",
           "color": "Light"
         },
-        {
-          "type": "ColumnSet",
-          "spacing": "Medium",
-          "horizontalAlignment": "Center",
-          "columns": [
-            {
-              "type": "Column",
-              "width": "auto",
-              "horizontalAlignment": "Center",
-              "items": [
-                {
-                  "type": "ActionSet",
-                  "actions": [
-                    {
-                      "type": "Action.OpenUrl",
-                      "title": "💠 DISCORD 💠",
-                      "url": "]] .. Config.DiscordInvite .. [[",
-                      "style": "positive"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Column",
-              "width": "auto",
-              "horizontalAlignment": "Center",
-              "items": [
-                {
-                  "type": "ActionSet",
-                  "actions": [
-                    {
-                      "type": "Action.OpenUrl",
-                      "title": "🌐 WEBSITE 🌐",
-                      "url": "]] .. Config.WebsiteLink .. [[",
-                      "style": "positive"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
+        ]] .. buttonsJson .. [[,
         {
           "type": "TextBlock",
           "text": "Powered by Janis Scripts",
@@ -147,7 +183,6 @@ Citizen.CreateThread(function()
 	end
 end)
 
-
 AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
     deferrals.defer()
     local src = source
@@ -169,22 +204,24 @@ AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
                         deferrals.done("Du wurdest abgelehnt!")
                     end
                 end)
-                return -- Event beenden, deferrals.done wurde im Callback aufgerufen
+                return
             end
         else
-            local userRoles = GetUserRoles(src)
-            if not userRoles or not userRoles[Config.WhitelistRoleID] then
-                if not cardShown then
-                    cardShown = true
-                    sendDebug("Spieler " .. GetPlayerName(src) .. " besitzt keine Whitelist-Rolle!", "warning")
-                    deferrals.presentCard(AdaptiveCard, function(data, _)
-                        if data.submitId == 'played' then
-                            deferrals.done()
-                        else
-                            deferrals.done("Keine Whitelist-Rolle!")
-                        end
-                    end)
-                    return
+            if Config.EnableWhitelist then
+                local userRoles = GetUserRoles(src)
+                if not userRoles or not userRoles[Config.WhitelistRoleID] then
+                    if not cardShown then
+                        cardShown = true
+                        sendDebug("Spieler " .. GetPlayerName(src) .. " besitzt keine Whitelist-Rolle!", "warning")
+                        deferrals.presentCard(AdaptiveCard, function(data, _)
+                            if data.submitId == 'played' then
+                                deferrals.done()
+                            else
+                                deferrals.done("Keine Whitelist-Rolle!")
+                            end
+                        end)
+                        return
+                    end
                 end
             end
 
@@ -207,6 +244,67 @@ AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
 
     deferrals.done()
 end)
+
+
+-- AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
+--     deferrals.defer()
+--     local src = source
+--     local license = GetIdentifier(src, 'license')
+--     local discordId = GetIdentifier(src, 'discord')
+--     discordId = discordId and discordId:gsub("discord:", "")
+
+--     -- Temporäre Flag, um in dieser Funktion zu merken, ob schon eine Card gezeigt wurde
+--     local cardShown = false
+
+--     if discordId then
+--         if not RegisterPermissions(src, 'playerConnecting') then
+--             if not cardShown then
+--                 cardShown = true
+--                 deferrals.presentCard(AdaptiveCard, function(data, _)
+--                     if data.submitId == 'played' then
+--                         deferrals.done("Du hast die Regeln akzeptiert!")
+--                     else
+--                         deferrals.done("Du wurdest abgelehnt!")
+--                     end
+--                 end)
+--                 return -- Event beenden, deferrals.done wurde im Callback aufgerufen
+--             end
+--         else
+--             local userRoles = GetUserRoles(src)
+--             if not userRoles or not userRoles[Config.WhitelistRoleID] then
+--                 if not cardShown then
+--                     cardShown = true
+--                     sendDebug("Spieler " .. GetPlayerName(src) .. " besitzt keine Whitelist-Rolle!", "warning")
+--                     deferrals.presentCard(AdaptiveCard, function(data, _)
+--                         if data.submitId == 'played' then
+--                             deferrals.done()
+--                         else
+--                             deferrals.done("Keine Whitelist-Rolle!")
+--                         end
+--                     end)
+--                     return
+--                 end
+--             end
+
+--             TriggerEvent('vMenu:RequestPermissions', src)
+--         end
+--     else
+--         sendDebug("Discord wurde nicht gefunden für Spieler " .. GetPlayerName(src), "warning")
+--         if not cardShown then
+--             cardShown = true
+--             deferrals.presentCard(AdaptiveCard, function(data, _)
+--                 if data.submitId == 'played' then
+--                     deferrals.done()
+--                 else
+--                     deferrals.done("Discord Account wird benötigt!")
+--                 end
+--             end)
+--             return
+--         end
+--     end
+
+--     deferrals.done()
+-- end)
 
 
 AddEventHandler('playerDropped', function (reason) 
